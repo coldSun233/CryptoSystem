@@ -2,6 +2,9 @@ package ECC;
 
 import java.math.BigInteger;
 
+/**
+ * 该类是关于椭圆曲线上点的类
+ */
 public class ECPoint {
     //点的坐标(x,y)
     private BigInteger x;

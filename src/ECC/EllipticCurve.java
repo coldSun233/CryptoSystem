@@ -21,13 +21,19 @@ public class EllipticCurve {
     private  BigInteger Two = new BigInteger("2");
     private BigInteger Three = new BigInteger("3");
     private BigInteger Four = new BigInteger("4");
-    private BigInteger TwentySenen = new BigInteger("27");
+    private BigInteger TwentySeven = new BigInteger("27");
 
     public EllipticCurve(BigInteger a,BigInteger b,BigInteger p,ECPoint g){
-        this.a = a;
-        this.b = b;
-        this.p = p;
-        this.g = g;
+        //如果p一定是合数，或该椭圆曲线是奇异的，或g不在椭圆曲线上，则初试化失败
+        if(!p.isProbablePrime(500) || isSingular(a, b) || !isPointOnCurve(g)){
+            this.p = this.a = this.b = null;
+        }
+        else{
+            this.a = a;
+            this.b = b;
+            this.p = p;
+            this.g = g;
+        }
     }
 
     public ECPoint getBasePoint() {
@@ -66,8 +72,8 @@ public class EllipticCurve {
      * 判断该椭圆曲线是否是奇异的，即4a^3+27b^2是否等于0,是则返回true
      * @return
      */
-    public boolean isSingular(){
-        return Four.multiply(a.pow(3)).mod(p).add(TwentySenen.multiply(b.pow(2)).mod(p))
+    public boolean isSingular(BigInteger a, BigInteger b){
+        return Four.multiply(a.pow(3)).mod(p).add(TwentySeven.multiply(b.pow(2)).mod(p))
                 .mod(p).compareTo(BigInteger.ZERO) == 0;
     }
 
@@ -166,6 +172,15 @@ public class EllipticCurve {
 
         return result;
 
+    }
+
+    /**
+     * 计算椭圆曲线y^2 = x^3 + ax + b的右半部分
+     * @param x
+     * @return
+     */
+    public BigInteger calculateR(BigInteger x){
+        return x.multiply(x).mod(p).add(a).multiply(x).add(b).mod(p);
     }
 
 }
