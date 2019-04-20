@@ -9,6 +9,13 @@ public class ECCryptoSystem {
     private static final long k_long = 1000;
     private static final BigInteger k = BigInteger.valueOf(k_long);
 
+    /**
+     * ECC的加密功能
+     * @param plainText 要加密的内容
+     * @param Key 用于加密的公钥
+     * @return
+     * @throws Exception
+     */
     public static byte[] encrypt(byte[] plainText, PublicKey Key) throws Exception {
 
         EllipticCurve c = Key.getC();
@@ -43,9 +50,9 @@ public class ECCryptoSystem {
         //G是椭圆曲线的基点
         //P_m是明文对应的椭圆曲线上的点
         //P_G是提供的公钥
-        ECPoint[][] encrypted = new ECPoint[plainTextBlockSize][2];
+        ECPoint[][] encrypted = new ECPoint[block.length][2];
         Random random = new Random(System.currentTimeMillis());
-        for(int i = 0; i < encoded.length; ++i){
+        for(int i = 0; i < encrypted.length; ++i){
             BigInteger k1;
             //生成一个随机数k1，且k1不能整除p
             do{
@@ -91,6 +98,88 @@ public class ECCryptoSystem {
 
     }
 
+
+    /**
+     * ECC解密函数
+     * @param cipherText
+     * @param Key
+     * @return
+     * @throws Exception
+     */
+    public static byte[] decrypt(byte[] cipherText, PrivateKey Key) throws Exception {
+
+        EllipticCurve c = Key.getC();
+        ECPoint g = c.getBasePoint();
+        BigInteger p = c.getP();
+        BigInteger privateKey = Key.getPrikey();
+
+        int plainTextBlockSize = getPlainTextBlockSize(c);
+        int cipherTextBlockSize = getCipherTextBlockSize(c);
+
+        //将密文分组
+        if (cipherText.length % cipherTextBlockSize != 0 || (cipherText.length / cipherTextBlockSize) % 4 != 0) {
+            throw new Exception("密文的长度是非法的");
+        }
+        byte block[][] = new byte[cipherText.length / cipherTextBlockSize][cipherTextBlockSize];
+        for(int i = 0; i< block.length; ++i){
+            for(int j = 0; j < cipherTextBlockSize; ++j){
+                block[i][j] = cipherText[i * cipherTextBlockSize + j];
+            }
+        }
+
+        //计算明文对应的椭圆曲线上的点 P_m
+        //P_m = C2 - kC1
+        //其中[C1, C2]是密文，k是私钥
+        ECPoint encoded[] = new ECPoint[block.length / 4];
+        for(int i = 0; i < block.length; i += 4){
+            ECPoint c1 = new ECPoint(new BigInteger(block[i]), new BigInteger(block[i + 1]));
+            ECPoint c2 = new ECPoint(new BigInteger(block[i + 2]), new BigInteger(block[i + 3]));
+            encoded[i / 4] = c.subtract(c2, c.multiply(privateKey, c1));
+        }
+
+        //从椭圆曲线上的点得到明文消息
+        byte plainText[] = new byte[encoded.length * plainTextBlockSize];
+        for(int i = 0; i < encoded.length; ++i){
+            byte decoded[] = decoded(encoded[i], c);
+            for(int j = Math.max(plainTextBlockSize - decoded.length, 0); j < plainTextBlockSize; ++j){
+                plainText[i * plainTextBlockSize + j] = decoded[j + decoded.length - plainTextBlockSize];
+            }
+        }
+        plainText = unpad(plainText, plainTextBlockSize);
+
+
+        return plainText;
+
+    }
+
+    /**
+     * 产生一个随机的密钥对
+     * @param c
+     * @param random
+     * @return
+     * @throws Exception
+     */
+    public static KeyPair generateKeyPair(EllipticCurve c, Random random) throws Exception{
+
+        //随机选取一个整数作为私钥，且私钥与p互素
+        BigInteger p = c.getP();
+        BigInteger privateKey;
+        do{
+            privateKey = new BigInteger(p.bitLength(), random);
+        } while(privateKey.mod(p).compareTo(BigInteger.ZERO) == 0);
+
+        //计算公钥 k * g, 其中k为私钥
+        ECPoint g = c.getBasePoint();
+        ECPoint publicKey = c.multiply(privateKey, g);
+
+        KeyPair result = new KeyPair(
+                new PublicKey(c, publicKey),
+                new PrivateKey(c, privateKey)
+        );
+
+        return result;
+    }
+
     /**
      * 将明文信息嵌入到椭圆去向上
      * @param block
@@ -100,16 +189,27 @@ public class ECCryptoSystem {
     private static ECPoint encode(byte[] block, EllipticCurve c) throws Exception {
         //填充两个byte，因为后面需要计算x = km，这里取的k = 1000
         byte[] paddedBlock = new byte[block.length + 2];
-        for(int i = 0; i<paddedBlock.length; ++i){
+        for(int i = 0; i< block.length; ++i){
             paddedBlock[i + 2] = block[i];
         }
 
         return legendre(c, new BigInteger(paddedBlock));
     }
 
+    /**
+     * 由椭圆曲线上的一点得到明文消息
+     * @param point
+     * @param c
+     * @return
+     */
+    private static byte[] decoded(ECPoint point, EllipticCurve c){
+        return point.getX().divide(k).toByteArray();
+    }
+
 
     /**
      * 结合勒让德符号的计算去得到椭圆曲线上的一点(x, √(x^3+ax+b))
+     * 该函数也可以用于随机生成椭圆曲线上的一个点
      * @param c
      * @param x
      * @return
@@ -137,7 +237,7 @@ public class ECCryptoSystem {
         }
 
         //如果找不到则返回异常；
-        throw new Exception("在范围k中找不到明文对应的点");
+        throw new Exception("在范围k = 1000中找不到明文对应的点");
     }
 
     /**
@@ -196,4 +296,99 @@ public class ECCryptoSystem {
     private static int getPlainTextBlockSize(EllipticCurve c) {
         return Math.max(c.getP().bitLength() / 8 - 5, 1);
     }
+
+
+
+    public static void main(String[] args) throws Exception{
+        EllipticCurve c = new EllipticCurve(
+                new BigInteger("-3"),
+                new BigInteger("64210519e59c80e70fa7e9ab72243049feb8deecc146b9b1", 16),
+                new BigInteger("6277101735386680763835789423207666416083908700390324961279"),
+                new ECPoint(
+                        new BigInteger("188da80eb03090f67cbf20eb43a18800f4ff0afd82ff1012", 16),
+                        new BigInteger("07192b95ffc8da78631011ed6b24cdd573f977a11e794811", 16)
+                )
+        );
+
+        Random rnd = new Random(System.currentTimeMillis());
+
+        int nTest = 10;
+        int failed = 0;
+        int size = 1024;
+
+        byte[] test = new byte[size];
+
+
+        for (int itest = 0; itest < nTest; ++itest) {
+            System.out.println("Test " + itest + ": " + size + " Bytes");
+            // randomize test
+            rnd.nextBytes(test);
+
+            // generate pair of keys
+            KeyPair keys = generateKeyPair(c, rnd);
+            System.out.println("\tGenerating key pair: ");
+
+            // encrypt test
+            byte[] cipherText = encrypt(test, keys.getPublicKey());
+            System.out.println("\tEncrypting         : ");
+
+            // decrypt the result
+            byte[] plainText = decrypt(cipherText, keys.getPrivateKey());
+            System.out.println("\tDecrypting         : ");
+
+            // compare them
+            boolean match = test.length == plainText.length;
+            for (int i = 0; i < test.length && i < plainText.length && match; ++i) {
+                if (test[i] != plainText[i]) {
+                    match = false;
+                    failed++;
+                }
+            }
+            System.out.println("\tResult             : " + match);
+
+//            rnd.nextBytes(test);
+//
+//            try {
+//                ECPoint point = encode(test, c);
+//                byte[] decoded = decode(point, c);
+//                boolean correctlyDecoded = true;
+//                for (int j = 0; j < test.length || j < decoded.length; ++j) {
+//                    if (j < test.length && j < decoded.length) {
+//                        if (test[test.length - j - 1] != decoded[decoded.length - j - 1]) {
+//                            correctlyDecoded = false;
+//                            break;
+//                        }
+//                    }
+//                    else if (j < test.length) {
+//                        if (test[test.length - j - 1] != 0) {
+//                            correctlyDecoded = false;
+//                            break;
+//                        }
+//                    }
+//                    else if (j < decoded.length) {
+//                        if (decoded[decoded.length - j - 1] != 0) {
+//                            correctlyDecoded = false;
+//                            break;
+//                        }
+//                    }
+//                }
+//
+//                System.out.println("test " + i + " (encode) = " + c.isPointInsideCurve(point) + " " + point.toString());
+//                System.out.println("test " + i + " (decode) = " + correctlyDecoded);
+//
+//                if (!correctlyDecoded) {
+//                    failed++;
+//                }
+//            } catch (Exception ex) {
+////                System.out.println("test " + i + " failed: " + ex.getMessage());
+//                ex.printStackTrace();
+//                failed++;
+//            }
+        }
+
+        System.out.println("Failed: " + failed + " of " + nTest);
+
+
+    }
+
 }

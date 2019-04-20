@@ -23,16 +23,14 @@ public class EllipticCurve {
     private BigInteger Four = new BigInteger("4");
     private BigInteger TwentySeven = new BigInteger("27");
 
-    public EllipticCurve(BigInteger a,BigInteger b,BigInteger p,ECPoint g){
+    public EllipticCurve(BigInteger a,BigInteger b,BigInteger p,ECPoint g) throws Exception{
+        this.a = a;
+        this.b = b;
+        this.p = p;
+        this.g = g;
         //如果p一定是合数，或该椭圆曲线是奇异的，或g不在椭圆曲线上，则初试化失败
         if(!p.isProbablePrime(500) || isSingular(a, b) || !isPointOnCurve(g)){
-            this.p = this.a = this.b = null;
-        }
-        else{
-            this.a = a;
-            this.b = b;
-            this.p = p;
-            this.g = g;
+            throw new Exception("椭圆曲线的初始化参数不对");
         }
     }
 
@@ -94,11 +92,11 @@ public class EllipticCurve {
         else if(p2.isPointOfInfinity())
             return p1;
 
-        //判断p1，p2是否在椭圆曲线上
-        if(isPointOnCurve(p1) || isPointOnCurve(p2)){
-            System.out.println("p1或p2不在该曲线上");
-            return null;
-        }
+        ////判断p1，p2是否在椭圆曲线上
+        //if(isPointOnCurve(p1) || isPointOnCurve(p2)){
+        //    System.out.println("p1或p2不在该曲线上");
+        //    return null;
+        //}
 
         /*加法规则如下:设P=(x1,y1) Q=(x2,y2),P != -Q 则p + Q = (x3, y3)
             x3 ≡ λ^2 - x1 - x2(mod p)
