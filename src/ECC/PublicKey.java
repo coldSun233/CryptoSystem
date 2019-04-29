@@ -3,6 +3,10 @@ package ECC;
 
 import java.io.*;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.List;
 
 /**
  * 椭圆曲线加密的公钥类
@@ -14,6 +18,31 @@ public class PublicKey {
     public PublicKey(EllipticCurve c, ECPoint pubKey){
         this.c = c;
         this.pubKey = pubKey;
+    }
+
+    /**
+     * 从指定文件中读取参数进行公钥初始化
+     * @param filePath
+     * @throws Exception
+     */
+    public PublicKey (String filePath) throws Exception {
+        List<String> lines = Files.readAllLines(Paths.get(filePath), StandardCharsets.UTF_8);
+        if(lines.size() != 7)
+            throw new Exception("选择的公钥密码文件存在问题!\n" +
+                    "请按照a, b, p,  gx, gy, pub_x, pub_y的顺序逐行存储");
+        else {
+            BigInteger a = new BigInteger(lines.get(0), 16);
+            BigInteger b = new BigInteger(lines.get(1), 16);
+            BigInteger p = new BigInteger(lines.get(2), 16);
+            BigInteger gx = new BigInteger(lines.get(3), 16);
+            BigInteger gy = new BigInteger(lines.get(4), 16);
+            BigInteger pub_x = new BigInteger(lines.get(5), 16);
+            BigInteger pub_y = new BigInteger(lines.get(6), 16);
+            EllipticCurve c = new EllipticCurve(a, b, p, new ECPoint(gx, gy));
+            ECPoint pubKey = new ECPoint(pub_x, pub_y);
+            this.c = c;
+            this.pubKey = pubKey;
+        }
     }
 
     public EllipticCurve getC() {

@@ -34,6 +34,13 @@ public class EllipticCurve {
         }
     }
 
+    public EllipticCurve(BigInteger b, BigInteger p, ECPoint g) {
+        this.a = new BigInteger("-3"); //NIST建议的椭圆曲线a = -3
+        this.b = b;
+        this.p =p;
+        this.g = g;
+    }
+
     public ECPoint getBasePoint() {
         return g;
     }
@@ -53,6 +60,7 @@ public class EllipticCurve {
     public BigInteger getP() {
         return p;
     }
+
 
     /**
      * 判断点point是否在椭圆曲线上
@@ -82,7 +90,7 @@ public class EllipticCurve {
      * 否则执行返回相加的结果
      * @param p1
      * @param p2
-     * @return 计算正确会返回一个ECpoint型的值，否则返回null
+     * @return
      */
     public ECPoint add(ECPoint p1,ECPoint p2){
         if(p1 == null || p2 == null)
@@ -91,12 +99,6 @@ public class EllipticCurve {
             return p2;
         else if(p2.isPointOfInfinity())
             return p1;
-
-        ////判断p1，p2是否在椭圆曲线上
-        //if(isPointOnCurve(p1) || isPointOnCurve(p2)){
-        //    System.out.println("p1或p2不在该曲线上");
-        //    return null;
-        //}
 
         /*加法规则如下:设P=(x1,y1) Q=(x2,y2),P != -Q 则p + Q = (x3, y3)
             x3 ≡ λ^2 - x1 - x2(mod p)

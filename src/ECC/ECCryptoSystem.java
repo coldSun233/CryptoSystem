@@ -3,11 +3,15 @@ package ECC;
 import java.math.BigInteger;
 import java.util.Random;
 
+
 public class ECCryptoSystem {
 
     //k是在明文镶嵌到椭圆曲线上是用于计算x = mk + j
     private static final long k_long = 1000;
     private static final BigInteger k = BigInteger.valueOf(k_long);
+
+    private static long executionTime = -1;
+    private static long startTime;
 
     /**
      * ECC的加密功能
@@ -17,6 +21,7 @@ public class ECCryptoSystem {
      * @throws Exception
      */
     public static byte[] encrypt(byte[] plainText, PublicKey Key) throws Exception {
+        initStartTime();
 
         EllipticCurve c = Key.getC();
         ECPoint g = c.getBasePoint();
@@ -94,6 +99,8 @@ public class ECCryptoSystem {
             }
         }
 
+        calculateExecutionTime();
+
         return cipherText;
 
     }
@@ -107,6 +114,7 @@ public class ECCryptoSystem {
      * @throws Exception
      */
     public static byte[] decrypt(byte[] cipherText, PrivateKey Key) throws Exception {
+        initStartTime();
 
         EllipticCurve c = Key.getC();
         ECPoint g = c.getBasePoint();
@@ -147,6 +155,7 @@ public class ECCryptoSystem {
         }
         plainText = unpad(plainText, plainTextBlockSize);
 
+        calculateExecutionTime();
 
         return plainText;
 
@@ -170,6 +179,12 @@ public class ECCryptoSystem {
 
         //计算公钥 k * g, 其中k为私钥
         ECPoint g = c.getBasePoint();
+        if(g == null) {
+            //随机产生一个g点
+            BigInteger x = new BigInteger(p.bitLength(),random);
+            g = legendre(c, x);
+            c.setBasePoint(g);
+        }
         ECPoint publicKey = c.multiply(privateKey, g);
 
         KeyPair result = new KeyPair(
@@ -230,7 +245,7 @@ public class ECCryptoSystem {
 
             //计算a^(p-1)/2,判断其是否与p互素，如果是则a是p的平方剩余
             if(a.modPow(p1,p).compareTo(BigInteger.ONE) == 0){
-                //计算y = a ^ ((p + 1) / 4)
+                //计算y = a ^ ((p + 1) / 4)，该结论只适用于p = 3 mod 4
                 BigInteger y = a.modPow(p.add(BigInteger.ONE).shiftRight(2), p);
                 return new ECPoint(newX, y);
             }
@@ -297,6 +312,18 @@ public class ECCryptoSystem {
         return Math.max(c.getP().bitLength() / 8 - 5, 1);
     }
 
+    private static void initStartTime() {
+        startTime = System.currentTimeMillis();
+    }
+
+    private static void calculateExecutionTime() {
+        executionTime = System.currentTimeMillis() - startTime;
+    }
+
+    public static long getExecutionTime() {
+        return executionTime;
+    }
+
 
 
     public static void main(String[] args) throws Exception{
@@ -346,44 +373,6 @@ public class ECCryptoSystem {
             }
             System.out.println("\tResult             : " + match);
 
-//            rnd.nextBytes(test);
-//
-//            try {
-//                ECPoint point = encode(test, c);
-//                byte[] decoded = decode(point, c);
-//                boolean correctlyDecoded = true;
-//                for (int j = 0; j < test.length || j < decoded.length; ++j) {
-//                    if (j < test.length && j < decoded.length) {
-//                        if (test[test.length - j - 1] != decoded[decoded.length - j - 1]) {
-//                            correctlyDecoded = false;
-//                            break;
-//                        }
-//                    }
-//                    else if (j < test.length) {
-//                        if (test[test.length - j - 1] != 0) {
-//                            correctlyDecoded = false;
-//                            break;
-//                        }
-//                    }
-//                    else if (j < decoded.length) {
-//                        if (decoded[decoded.length - j - 1] != 0) {
-//                            correctlyDecoded = false;
-//                            break;
-//                        }
-//                    }
-//                }
-//
-//                System.out.println("test " + i + " (encode) = " + c.isPointInsideCurve(point) + " " + point.toString());
-//                System.out.println("test " + i + " (decode) = " + correctlyDecoded);
-//
-//                if (!correctlyDecoded) {
-//                    failed++;
-//                }
-//            } catch (Exception ex) {
-////                System.out.println("test " + i + " failed: " + ex.getMessage());
-//                ex.printStackTrace();
-//                failed++;
-//            }
         }
 
         System.out.println("Failed: " + failed + " of " + nTest);

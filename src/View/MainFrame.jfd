@@ -1,0 +1,307 @@
+JFDML JFormDesigner: "6.0.2.0.116" Java: "1.8.0_152-release" encoding: "UTF-8"
+
+new FormModel {
+	contentType: "form/swing"
+	root: new FormRoot {
+		add( new FormWindow( "javax.swing.JFrame", new FormLayoutManager( class com.jformdesigner.runtime.NullLayout ) ) {
+			name: "this"
+			"title": "CryptoSystem"
+			"resizable": false
+			"defaultCloseOperation": 3
+			add( new FormContainer( "javax.swing.JTabbedPane", new FormLayoutManager( class javax.swing.JTabbedPane ) ) {
+				name: "tabbedPane"
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.jformdesigner.runtime.NullLayout ) ) {
+					name: "panel1"
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "label_a"
+						"text": "Parameter A"
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 20
+						"y": 20
+						"width": 80
+						"height": 30
+					} )
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "label_b"
+						"text": "Parameter B"
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 20
+						"y": 85
+						"width": 80
+						"height": 30
+					} )
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "label_p"
+						"text": "Parameter P"
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 20
+						"y": 150
+						"width": 80
+						"height": 30
+					} )
+					add( new FormComponent( "javax.swing.JTextField" ) {
+						name: "textField_a"
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 15
+						"y": 50
+						"width": 250
+						"height": 35
+					} )
+					add( new FormComponent( "javax.swing.JTextField" ) {
+						name: "textField_b"
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 15
+						"y": 115
+						"width": 250
+						"height": 35
+					} )
+					add( new FormComponent( "javax.swing.JTextField" ) {
+						name: "textField_p"
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 15
+						"y": 180
+						"width": 250
+						"height": 35
+					} )
+					add( new FormComponent( "javax.swing.JComboBox" ) {
+						name: "comboBox_kinds"
+						"model": new javax.swing.DefaultComboBoxModel {
+							selectedItem: "Custom"
+							addElement( "Custom" )
+							addElement( "NIST_P_192" )
+							addElement( "NIST_P_256" )
+							addElement( "NIST_P_384" )
+							addElement( "NIST_P_521" )
+						}
+						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "comboBox_kindsActionPerformed", true ) )
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 285
+						"y": 180
+						"height": 35
+						"width": 110
+					} )
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "button_gpriKey"
+						"text": "Generate Private Key"
+						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "button_gpriKeyActionPerformed", true ) )
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 285
+						"y": 240
+						"height": 35
+					} )
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "button_gpubKey"
+						"text": "Generate Public Key"
+						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "button_gpubKeyActionPerformed", true ) )
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 110
+						"y": 240
+						"height": 35
+					} )
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "button_process"
+						"text": "Process"
+						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "button_processActionPerformed", true ) )
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 430
+						"y": 180
+						"height": 35
+						"width": 80
+					} )
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "label_basePoineX"
+						"text": "Base Point_X:"
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 290
+						"y": 20
+						"height": 30
+						"width": 85
+					} )
+					add( new FormComponent( "javax.swing.JTextField" ) {
+						name: "textField_gx"
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 285
+						"y": 50
+						"width": 250
+						"height": 35
+					} )
+					add( new FormComponent( "javax.swing.JTextField" ) {
+						name: "textField_gy"
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 285
+						"y": 115
+						"width": 250
+						"height": 35
+					} )
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "label_basePointY"
+						"text": "Base Point_Y:"
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 290
+						"y": 85
+						"width": 85
+						"height": 30
+					} )
+				}, new FormLayoutConstraints( null ) {
+					"title": "Key Generator"
+				} )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.jformdesigner.runtime.NullLayout ) ) {
+					name: "panel2"
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "label_inFile1"
+						"text": "Input File:"
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 80
+						"y": 25
+						"height": 30
+					} )
+					add( new FormComponent( "javax.swing.JTextField" ) {
+						name: "textField_inFilePath1"
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 75
+						"y": 55
+						"height": 35
+						"width": 250
+					} )
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "button_inFileBro1"
+						"text": "Browse"
+						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "button_inFileBro1ActionPerformed", true ) )
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 340
+						"y": 55
+						"height": 35
+					} )
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "label_pubKey"
+						"text": "Public Key:"
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 80
+						"y": 110
+						"height": 30
+					} )
+					add( new FormComponent( "javax.swing.JTextField" ) {
+						name: "textField_pubKeyPath"
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 75
+						"y": 140
+						"width": 250
+						"height": 35
+					} )
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "button_pubKeyBro"
+						"text": "Browse"
+						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "button_pubKeyBroActionPerformed", true ) )
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 340
+						"y": 140
+						"height": 35
+					} )
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "button_encrypt"
+						"text": "Encrypt"
+						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "button_encryptActionPerformed", true ) )
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 185
+						"y": 205
+						"height": 35
+						"width": 100
+					} )
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "label_time1"
+						"text": "Time:"
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 100
+						"y": 260
+						"height": 35
+						"width": 80
+					} )
+				}, new FormLayoutConstraints( null ) {
+					"title": "Encryption"
+				} )
+				add( new FormContainer( "javax.swing.JPanel", new FormLayoutManager( class com.jformdesigner.runtime.NullLayout ) ) {
+					name: "panel3"
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "label_inFile2"
+						"text": "Input File:"
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 80
+						"y": 25
+						"height": 30
+					} )
+					add( new FormComponent( "javax.swing.JTextField" ) {
+						name: "textField_inFilePath2"
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 75
+						"y": 55
+						"width": 250
+						"height": 35
+					} )
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "label_priKey"
+						"text": "Private Key:"
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 80
+						"y": 110
+						"height": 30
+					} )
+					add( new FormComponent( "javax.swing.JTextField" ) {
+						name: "textField_privKeyPath"
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 75
+						"y": 140
+						"width": 250
+						"height": 35
+					} )
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "button_inFileBro2"
+						"text": "Browse"
+						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "button_inFileBro2ActionPerformed", true ) )
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 340
+						"y": 55
+						"height": 35
+					} )
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "button_priKeyBro"
+						"text": "Browse"
+						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "button_priKeyBroActionPerformed", true ) )
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 340
+						"y": 140
+						"height": 35
+					} )
+					add( new FormComponent( "javax.swing.JButton" ) {
+						name: "button_decrypt"
+						"text": "Decrypt"
+						addEvent( new FormEvent( "java.awt.event.ActionListener", "actionPerformed", "button_decryptActionPerformed", true ) )
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 185
+						"y": 205
+						"width": 100
+						"height": 35
+					} )
+					add( new FormComponent( "javax.swing.JLabel" ) {
+						name: "label_time2"
+						"text": "Time:"
+					}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+						"x": 100
+						"y": 260
+						"height": 35
+						"width": 80
+					} )
+				}, new FormLayoutConstraints( null ) {
+					"title": "Decryption"
+				} )
+			}, new FormLayoutConstraints( class com.jformdesigner.runtime.NullConstraints ) {
+				"x": 0
+				"y": 0
+				"width": 550
+				"height": 350
+			} )
+		}, new FormLayoutConstraints( null ) {
+			"location": new java.awt.Point( 0, 0 )
+			"size": new java.awt.Dimension( 630, 530 )
+		} )
+	}
+}
