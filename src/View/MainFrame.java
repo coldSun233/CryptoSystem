@@ -178,6 +178,10 @@ public class MainFrame extends JFrame {
                     fout.close();
                     File f = new File(savePath);
                     label_time1.setText("Time:" + ECCryptoSystem.getExecutionTime() + "ms");
+
+                    textField_inFilePath1.setText("");
+                    textField_pubKeyPath.setText("");
+                    pubKey = null;
                 }
 
             } catch (Exception e1) {
@@ -234,6 +238,10 @@ public class MainFrame extends JFrame {
                     fout.close();
                     File f = new File(savePath);
                     label_time2.setText("Time:" + ECCryptoSystem.getExecutionTime() + "ms");
+
+                    textField_inFilePath2.setText("");
+                    textField_privKeyPath.setText("");
+                    priKey = null;
                 }
 
             } catch (Exception e1) {
@@ -280,7 +288,7 @@ public class MainFrame extends JFrame {
         label_time2 = new JLabel();
 
         //======== this ========
-        setTitle("CryptoSystem");
+        setTitle("ECCryptoSystem");
         setResizable(false);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         Container contentPane = getContentPane();
