@@ -1,11 +1,19 @@
 package RSA;
 
+import java.io.FileOutputStream;
 import java.math.BigInteger;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Random;
 
 public class RSACryptoSystem {
 
+    private static long executionTime = -1;
+    private static long startTime;
+
     public static byte[] encrypt(byte[] plainText, PublicKey Key) {
+        initStartTime();
+
         BigInteger e = Key.getE();
         BigInteger n = Key.getN();
         int bitLength = Key.getN().bitLength();
@@ -31,12 +39,14 @@ public class RSACryptoSystem {
                 cipherText[j + offset] = cipher[j];
             }
         }
-
+        calculateExecutionTime();
         return cipherText;
 
     }
 
     public static  byte[] decrypt(byte[] cipherText, PrivateKey Key) throws Exception {
+        initStartTime();
+
         BigInteger d = Key.getD();
         BigInteger n = Key.getN();
         int bitLength = Key.getN().bitLength();
@@ -64,6 +74,8 @@ public class RSACryptoSystem {
         }
 
         plainText = unpad(plainText, plainBlockSize);
+
+        calculateExecutionTime();
 
         return plainText;
     }
@@ -105,9 +117,14 @@ public class RSACryptoSystem {
         for(int i = 0; i < paddedLength - 1; ++i){
             padded[text.length + i] = 0;
         }
-
-        //最后一位为填充的长度paddedLength
-        padded[padded.length - 1] = (byte)paddedLength;
+        if(paddedLength <= 127)
+            //最后一位为填充的长度paddedLength
+            padded[padded.length - 1] = (byte)paddedLength;
+        else{//否则最后两个byte存储填充的数目
+            byte[] result = intToByte(paddedLength);
+            padded[padded.length - 2] = result[0];
+            padded[padded.length - 1] = result[1];
+        }
 
         return padded;
     }
@@ -119,7 +136,15 @@ public class RSACryptoSystem {
      * @return
      */
     private static byte[] unpad(byte[] text, int blockSize){
-        int paddedLength = text[text.length - 1];
+        int paddedLength;
+        if((int)text[text.length - 2] == 0 && (int)text[text.length - 1] >= 0)
+            paddedLength = text[text.length - 1];
+        else{
+            byte[] array = new byte[2];
+            array[0] = text[text.length - 2];
+            array[1] = text[text.length - 1];
+            paddedLength = byteToInt(array);
+        }
         byte[] unpadded = new byte[text.length - paddedLength];
         for(int i = 0; i < unpadded.length; ++i){
             unpadded[i] = text[i];
@@ -135,37 +160,92 @@ public class RSACryptoSystem {
         return (bitLength / 8) + 1; //保证数组能存下c的信息额外添加一个字节
     }
 
+    private static byte[] intToByte(int num){
+        byte result[] = new byte[2];//2个byte存储填充的数目对RSA来说已经足够
+        result[0] = (byte)((num>>8)&0xFF);
+        result[1] = (byte)(num &0xFF);
+        return result;
+    }
+
+    private static int byteToInt(byte[] array) {
+        return (int)(((array[0] & 0xff) << 8)
+                | ((array[1] & 0xff) << 0));
+    }
+
+    private static void initStartTime() {
+        startTime = System.currentTimeMillis();
+    }
+
+    private static void calculateExecutionTime() {
+        executionTime = System.currentTimeMillis() - startTime;
+    }
+
+    public static long getExecutionTime() {
+        return executionTime;
+    }
+
+
     public static void main(String[] args) throws  Exception{
-        int failed = 0;
-        Random random = new Random(System.currentTimeMillis());
-        byte[] test = new byte[1024];
-        for(int i = 0; i < 10; ++i) {
-            System.out.println("test" + i);
-            random.nextBytes(test);
+        //int failed = 0;
+        long encryptTime = 0;
+        long decryptTime = 0;
+        String plainPath = "D:/test.txt";
+        String encryptPath = "D:/encrypt_rsa.txt";
+        String decryptPath = "D:/decrypt_rsa.txt";
 
-            KeyPair keys = generateKeyPair(1024);
-            System.out.println("generate key pair");
+        KeyPair keys = generateKeyPair(2048);
 
-            byte[] cipherText = encrypt(test, keys.getPublicKey());
-            System.out.println("encrypt");
+        byte[] plainText = Files.readAllBytes(Paths.get(plainPath));
+        byte[] byteFile = encrypt(plainText, keys.getPublicKey());
+        encryptTime = getExecutionTime();
+        FileOutputStream fout = new FileOutputStream(encryptPath);
+        fout.write(byteFile);
+        fout.close();
 
-            byte[] plainText = decrypt(cipherText, keys.getPrivateKey());
-            System.out.println("decrypt");
+        byte[] cipherText = Files.readAllBytes(Paths.get(encryptPath));
+        byteFile = decrypt(cipherText, keys.getPrivateKey());
+        decryptTime = getExecutionTime();
+        fout = new FileOutputStream(decryptPath);
+        fout.write(byteFile);
+        fout.close();
 
-            System.out.println(plainText.length);
-            boolean match = test.length == plainText.length;
-            System.out.println("result0" + match);
-            for (int j = 0; j < test.length; ++j) {
-                if(test[j] != plainText[j]) {
-                    match = false;
-                    failed++;
-                }
-            }
+        System.out.println("encrypt" + encryptTime);
+        System.out.println("decrypt" + decryptTime);
 
-            System.out.println("result" + match);
-            System.out.println("failed" + failed);
 
-        }
+       // Random random = new Random(System.currentTimeMillis());
+       // byte[] test = new byte[4096];
+       // for(int i = 0; i < 100; ++i) {
+       //     //System.out.println("test" + i);
+       //     random.nextBytes(test);
+       //
+       //     KeyPair keys = generateKeyPair(2048);
+       //     //System.out.println("generate key pair");
+       //
+       //     byte[] cipherText = encrypt(test, keys.getPublicKey());
+       //     encryptTime += getExecutionTime();
+       //    // System.out.println("encrypt");
+       //
+       //     byte[] plainText = decrypt(cipherText, keys.getPrivateKey());
+       //     decryptTime += getExecutionTime();
+       //     //System.out.println("decrypt");
+       //
+       //     //System.out.println(plainText.length);
+       //     boolean match = test.length == plainText.length;
+       //     //System.out.println("result0" + match);
+       //     for (int j = 0; j < test.length; ++j) {
+       //         if(test[j] != plainText[j]) {
+       //             match = false;
+       //             failed++;
+       //         }
+       //     }
+       //
+       // }
+       //
+       //// System.out.println("result" + match);
+       // System.out.println("failed" + failed);
+       // System.out.println("encryptTime" + encryptTime / 10.0);
+       // System.out.println("decryptTime" + decryptTime / 10.0);
     }
 
 }

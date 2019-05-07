@@ -176,7 +176,6 @@ public class MainFrame extends JFrame {
                     FileOutputStream fout = new FileOutputStream(savePath);
                     fout.write(byteFile);
                     fout.close();
-                    File f = new File(savePath);
                     label_time1.setText("Time:" + ECCryptoSystem.getExecutionTime() + "ms");
 
                     textField_inFilePath1.setText("");
