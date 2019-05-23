@@ -1,8 +1,5 @@
 package ECC;
 
-
-import RSA.RSACryptoSystem;
-
 import java.io.FileOutputStream;
 import java.math.BigInteger;
 import java.nio.file.Files;
@@ -51,37 +48,31 @@ public class ECCryptoSystem {
         }
         System.out.println("明文分组完毕");
 
-        //将明文信息嵌入到椭圆曲线上
+        //encoded存储明文编码后的信息
         ECPoint[] encoded = new  ECPoint[block.length];
-        for(int i = 0; i < encoded.length; ++i){
-            encoded[i] = encode(block[i], c);
-        }
-        System.out.println("明文信息嵌入完毕");
-
-        //对得到的每一个点做加密变换
-        //密文为{C1, C2} = {kG, P_m + kP_A}
-        //其中k是一个随机数且1 <= k <p-1
-        //G是椭圆曲线的基点
-        //P_m是明文对应的椭圆曲线上的点
-        //P_G是提供的公钥
+        //encrypted存储加密变换后的信息
         ECPoint[][] encrypted = new ECPoint[block.length][2];
         Random random = new Random(System.currentTimeMillis());
-        System.out.println(encrypted.length);
-        for(int i = 0; i < encrypted.length; ++i){
+        byte[] cipherText = new byte[encrypted.length * cipherTextBlockSize * 4];
+
+        //将明文嵌入到椭圆曲线上
+        for(int i = 0; i < encoded.length; ++i){
+            encoded[i] = encode(block[i], c);
             BigInteger k1;
             //生成一个随机数k1，且k1不能整除p
-           // do{
+           do{
                 k1 = new BigInteger(numBits,random);
-            //} while (k1.mod(p).compareTo(BigInteger.ZERO) == 0);
+            } while (k1.mod(p).compareTo(BigInteger.ZERO) == 0);
+            //对得到的每一个点做加密变换
+            //密文为{C1, C2} = {kG, P_m + kP_A}
+            //其中k是一个随机数且1 <= k <p-1
+            //G是椭圆曲线的基点
+            //P_m是明文对应的椭圆曲线上的点
+            //P_G是提供的公钥
             encrypted[i][0] = c.multiply(k1, g);
             encrypted[i][1] = c.add(encoded[i], c.multiply(k1, publicKey));
-            System.out.println(i);
-        }
-        System.out.println("加密变换完毕");
-        //将加密后得到的各个密文块拼接到一起
-        byte[] cipherText = new byte[encrypted.length * cipherTextBlockSize * 4];
-        for(int i = 0; i < encrypted.length; ++i){
-            //encrypted[i][0].x
+
+            //密文的拼接
             byte[] cipher = encrypted[i][0].getX().toByteArray();
             int offset = i * cipherTextBlockSize * 4 + cipherTextBlockSize * 0 + (cipherTextBlockSize - cipher.length);
             for(int j = 0; j < cipher.length; ++j){
@@ -108,7 +99,10 @@ public class ECCryptoSystem {
             for(int j = 0; j < cipher.length; ++j){
                 cipherText[j + offset] = cipher[j];
             }
+
         }
+        System.out.println("明文信息嵌入完毕");
+        System.out.println("加密变换完毕");
         System.out.println("密文拼接完毕");
         calculateExecutionTime();
 
@@ -338,7 +332,7 @@ public class ECCryptoSystem {
 
 
     public static void main(String[] args) throws Exception{
-        EllipticCurve c = NIST.P_192;
+        EllipticCurve c = NIST.P_521;
 
         Random rnd = new Random(System.currentTimeMillis());
         KeyPair keys = generateKeyPair(c, rnd);
@@ -370,49 +364,6 @@ public class ECCryptoSystem {
 
         System.out.println("encrypt" + encryptTime);
         System.out.println("decrypt" + decryptTime);
-
-        //int nTest = 100;
-        //int failed = 0;
-        //int size = 1024;
-        //
-        //byte[] test = new byte[size];
-        //
-        //
-        //for (int itest = 0; itest < nTest; ++itest) {
-        //   // System.out.println("Test " + itest + ": " + size + " Bytes");
-        //    // randomize test
-        //    rnd.nextBytes(test);
-        //
-        //    // generate pair of keys
-        //    KeyPair keys = generateKeyPair(c, rnd);
-        //  //  System.out.println("\tGenerating key pair: ");
-        //
-        //    // encrypt test
-        //    byte[] cipherText = encrypt(test, keys.getPublicKey());
-        //    encryTime += getExecutionTime();
-        //  //  System.out.println("\tEncrypting         : ");
-        //
-        //    // decrypt the result
-        //    byte[] plainText = decrypt(cipherText, keys.getPrivateKey());
-        //    decryptTime += getExecutionTime();
-        //    //System.out.println("\tDecrypting         : ");
-        //
-        //    // compare them
-        //    boolean match = test.length == plainText.length;
-        //    for (int i = 0; i < test.length && i < plainText.length && match; ++i) {
-        //        if (test[i] != plainText[i]) {
-        //            match = false;
-        //            failed++;
-        //        }
-        //    }
-        //   // System.out.println("\tResult             : " + match);
-        //
-        //}
-        //
-        //System.out.println("encryptTime:" + encryTime / 100.0);
-        //System.out.println("decryptTime:" + decryptTime / 100.0);
-        //System.out.println("Failed: " + failed + " of " + nTest);
-
 
     }
 

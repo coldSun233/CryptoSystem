@@ -116,9 +116,10 @@ public class EllipticCurve {
         if(x1.subtract(x2).mod(p).compareTo(BigInteger.ZERO) == 0){
             if(y1.subtract(y2).mod(p).compareTo(BigInteger.ZERO) == 0){
                 //P == Q时
-                BigInteger num = x1.modPow(Two,p).multiply(Three).add(a).mod(p);
-                BigInteger den = y1.add(y1);
-                lambda = num.multiply(den.modInverse(p)).mod(p);
+                //BigInteger num = x1.modPow(Two,p).multiply(Three).add(a).mod(p);
+                //BigInteger den = y1.add(y1);
+                //lambda = num.multiply(den.modInverse(p)).mod(p);
+                return doublePoint(p1);
             } else{
                 //P,Q横坐标相同纵坐标不同，此时P,Q位于一条直线上，此时直接返回无穷远点O
                 return ECPoint.infinity();
@@ -151,6 +152,25 @@ public class EllipticCurve {
         return add(p1, p2.negate());
     }
 
+    public ECPoint doublePoint(ECPoint point){
+        if(point == null)
+            return null;
+        if(point.isPointOfInfinity())
+            return ECPoint.infinity();
+        BigInteger x = point.getX();
+        BigInteger y = point.getY();
+
+        BigInteger num = x.modPow(Two,p).multiply(Three).add(a).mod(p);
+        BigInteger den = y.add(y);
+        BigInteger lambda = num.multiply(den.modInverse(p)).mod(p);
+
+        BigInteger x3 = lambda.modPow(Two,p).subtract(x).subtract(x).mod(p);
+        BigInteger y3 = lambda.multiply(x.subtract(x3)).subtract(y).mod(p);
+
+        return new ECPoint(x3,y3);
+    }
+
+
     /**
      * 设P(x,y)，返回nP的结果
      * @param n
@@ -158,22 +178,75 @@ public class EllipticCurve {
      * @return
      */
     public ECPoint multiply(BigInteger n,ECPoint p){
+        //return binaryExp(n,p);
+        return slidingWindow(n, p);
+
+    }
+
+    //二进制展开法求倍点运算
+    private ECPoint binaryExp(BigInteger n,ECPoint p) {
         if(p.isPointOfInfinity())
             return ECPoint.infinity();
 
         ECPoint result = ECPoint.infinity();
         int bitLength = n.bitLength();
         for(int i = bitLength - 1; i >= 0; i--){
-            result = add(result, result);
+            //result = add(result, result);
+            result = doublePoint(result);
             if(n.testBit(i)){
                 result = add(result, p);
             }
         }
 
         return result;
-
     }
 
+    //滑动窗口法求倍点运算
+    private ECPoint slidingWindow(BigInteger n, ECPoint p){
+        if(p.isPointOfInfinity())
+            return ECPoint.infinity();
+
+        int h = 3; //窗口的指定大小
+        //预处理
+        int j = 2 << (h - 1) - 1;
+        ECPoint[] points = new ECPoint[j + 2];
+        points[0] = doublePoint(p);
+        points[1] = p;
+        for(int i = 2; i <= j + 1; ++i) {
+            points[i] = this.add(points[i - 1], points[0]);
+        }
+
+        //主运算
+        ECPoint q = ECPoint.infinity();
+        for(int i = n.bitLength() - 1; i >= 0;){
+            if(n.testBit(i)){
+                int l = i - h + 1;
+                if(l < 0)
+                    l = 0;
+                while(!n.testBit(l))
+                    l++;
+                for(int m = 1; m <= i - l + 1; ++m)
+                    q = doublePoint(q);
+
+                int offset = 0;
+                int temp = 1;
+                for(int x = l; x <= i; ++x){
+                    if(n.testBit(x))
+                        offset += temp;
+                    temp = 2 * temp;
+                }
+
+                q = this.add(q, points[offset / 2 + 1]);
+                i= l - 1;
+            }
+            else{
+                q = doublePoint(q);
+                i--;
+            }
+        }
+
+        return q;
+    }
     /**
      * 计算椭圆曲线y^2 = x^3 + ax + b的右半部分
      * @param x

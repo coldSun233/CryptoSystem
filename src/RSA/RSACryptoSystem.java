@@ -137,7 +137,7 @@ public class RSACryptoSystem {
      */
     private static byte[] unpad(byte[] text, int blockSize){
         int paddedLength;
-        if((int)text[text.length - 2] == 0 && (int)text[text.length - 1] >= 0)
+        if((int)text[text.length - 1] >= 0)
             paddedLength = text[text.length - 1];
         else{
             byte[] array = new byte[2];
@@ -212,40 +212,6 @@ public class RSACryptoSystem {
         System.out.println("encrypt" + encryptTime);
         System.out.println("decrypt" + decryptTime);
 
-
-       // Random random = new Random(System.currentTimeMillis());
-       // byte[] test = new byte[4096];
-       // for(int i = 0; i < 100; ++i) {
-       //     //System.out.println("test" + i);
-       //     random.nextBytes(test);
-       //
-       //     KeyPair keys = generateKeyPair(2048);
-       //     //System.out.println("generate key pair");
-       //
-       //     byte[] cipherText = encrypt(test, keys.getPublicKey());
-       //     encryptTime += getExecutionTime();
-       //    // System.out.println("encrypt");
-       //
-       //     byte[] plainText = decrypt(cipherText, keys.getPrivateKey());
-       //     decryptTime += getExecutionTime();
-       //     //System.out.println("decrypt");
-       //
-       //     //System.out.println(plainText.length);
-       //     boolean match = test.length == plainText.length;
-       //     //System.out.println("result0" + match);
-       //     for (int j = 0; j < test.length; ++j) {
-       //         if(test[j] != plainText[j]) {
-       //             match = false;
-       //             failed++;
-       //         }
-       //     }
-       //
-       // }
-       //
-       //// System.out.println("result" + match);
-       // System.out.println("failed" + failed);
-       // System.out.println("encryptTime" + encryptTime / 10.0);
-       // System.out.println("decryptTime" + decryptTime / 10.0);
     }
 
 }
